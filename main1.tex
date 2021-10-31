@@ -1,0 +1,103 @@
+%-----------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATION
+%-----------------------------------------------------------------------------
+
+% Use `report` class with `USCthesis` package (style file) by Brian P. Gerkey
+\documentclass[12pt]{report}
+%\documentclass[11.5pt]{report}
+
+%\let\Bbbk\relax
+% [options] can be any of these default/alternative flag:
+%   dissertation/thesis, final/proposal, copyright/nocopyright,
+%   fussy/sloppy, flushbottom/raggedbottom, clref/opref.
+%\usepackage[dissertation,final,raggedbottom]{USCthesis}
+\usepackage[dissertation,proposal]{USCthesis}
+%\usepackage[final]{nert}
+
+
+\input{header}
+
+\begin{document}
+
+%-----------------------------------------------------------------------------
+%	TITLE PAGE
+%-----------------------------------------------------------------------------
+
+% Volume name could be added as option, e.g. `[Volume I]`.
+\title{\scshape\Huge\textbf{Machine Learning on \\ 
+Imbalanced Categorical Distributions}}
+
+\author{Thamme Gowda}
+
+% Committee list is only shown in `proposal` layout.
+\committee{Prof. Jonathan May {\scriptsize (Chair)}\\*
+    Prof. Nanyun Peng\\*
+    Prof. Xiang Ren\\*
+    Prof. Aiichiro Nakano\\*
+    Prof. Shri Narayanan\\*
+    Prof. Chris Mattmann
+}
+
+% Submission information is only shown in `final` layout.
+\majorfield{Computer Science}
+\submitdate{July 2021}
+
+%-----------------------------------------------------------------------------
+%	PREFACE
+%-----------------------------------------------------------------------------
+
+% The preface environment prints the title page.
+\begin{preface}
+
+  % Dedication Page, which is truly unnecessary.
+  %\prefacesection{Dedication}
+  % \input{preface/dedication}
+  
+  % Acknowledgement Page, which is also unnecessary for proposals.
+  %\prefacesection{Acknowledgments}
+  %\input{preface/acks}
+
+  \tableofcontents
+  \listoftables
+  \listoffigures
+
+  % Abstract Page
+  \prefacesection{Abstract}
+   \input{preface/abstract}
+
+\end{preface}
+
+%-----------------------------------------------------------------------------
+%	CONTENT STRUCTURE
+%-----------------------------------------------------------------------------
+
+\include{chapter/01-intro}
+\include{chapter/02-affirm-act}
+\include{chapter/03-nlg-imbalance}
+\include{chapter/04-evaluation}
+\include{chapter/05-imbalanced-learn}
+\include{chapter/06-multilingual-nmt}
+
+
+\begin{singlespace}
+
+    \bibliography{anthology}
+    %\bibliographystyle{acl_natbib}
+    \bibliographystyle{acl_natbib}
+\end{singlespace}
+
+
+% Appendices
+\appendix
+
+\include{chapter/x01-appendix-A}
+
+
+
+% In case your dissertation has multiple volumes.
+% \addvolumecontents{thesis_part2}
+% \addvolumecontents{thesis_part3}
+% \addvolumecontents[lof]{thesis_part2}
+
+
+\end{document}

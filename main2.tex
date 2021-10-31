@@ -1,0 +1,104 @@
+\documentclass[oneside,letterpaper,12pt]{book}
+\usepackage[margin=1in,letterpaper]{geometry}  
+% http://graduateschool.usc.edu/wp-content/themes/fictional-university-theme/assets/doc/Manuscript_Formatting_and_Documentation_Styles.pdf
+% Paper: 8.5" x 11" -- letter paper
+% Margins:
+%    All margins 1" 
+%    Footer margin, page number must be 0.5" from the bottom
+%    Except page number, everything else must fit within margin
+% Spacing:
+%    Double space text throughout manuscript and indent paragraphs
+%    Sing space footnotes, long quoted para, fig and tab captions, items in lists and tables
+%    Bibliography (if style manual requires ) single space within entry, and double space between entries  
+% Font style and size:
+%    be consistent
+%    regular para text: 11 or 12 pt
+%    chapter title and main section heading, at least 16pt
+%    footnote, caption, eqns, within figs & tabs: atleast 9pt
+%    Color: black, except for hyerplinks, within tabs and figs
+%    bold for headings, chapter, section, sub section etc
+% Page num:
+%    0.5" from bottom; either center or right but be consistent
+%    dont bold or italicize
+%    same font family as body text
+%    
+% [[ Pagination and order see PDF in the above link]]  
+%    
+
+\usepackage{sectsty}
+%\chapternumberfont{\Large} 
+%\chaptertitlefont{\LARGE}
+\chapternumberfont{\fontsize{20pt}{20pt}\selectfont} 
+\chaptertitlefont{\fontsize{20pt}{20pt}\selectfont}
+
+
+\input{header}  % all the imports and stuff
+\pagestyle{plain}
+
+
+\begin{document}
+
+\input{titlepage}
+
+\setstretch{1.15}     % line stretch
+%\setstretch{2}        % double space
+
+%-----------------------------------------------------------------------------
+%	PREFACE aka FRONT MATTER
+%-----------------------------------------------------------------------------
+\frontmatter
+
+
+
+\chapter{Dedication}
+\input{preface/dedication}
+
+\input{preface/inspiration}
+
+\chapter{Acknowledgments}
+\input{preface/acks}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\chapter{Abstract}
+\input{preface/abstract}
+
+%-----------------------------------------------------------------------------
+%	MAIN MATTER
+%-----------------------------------------------------------------------------
+\mainmatter
+\include{chapter/01-intro}
+
+\include{chapter/02-ml-classification}
+
+\include{chapter/03-nlg-imbalance}
+
+\include{chapter/02-affirm-act}  % <-- not sure where this goes
+
+\include{chapter/04-evaluation}
+
+\include{chapter/05-imbalanced-learn}
+
+\include{chapter/06-multilingual-nmt}
+
+%-----------------------------------------------------------------------------
+%	BIBLIOGRAPHY / REFERENCES
+%-----------------------------------------------------------------------------
+\begin{singlespace}
+\bibliography{anthology}
+%\bibliographystyle{acl_natbib}
+\bibliographystyle{acl_natbib}
+\end{singlespace}
+
+
+%-----------------------------------------------------------------------------
+%	APPENDICES
+%-----------------------------------------------------------------------------
+\appendix
+\include{chapter/x01-appendix-A}
+
+
+%\backmatter
+\end{document}

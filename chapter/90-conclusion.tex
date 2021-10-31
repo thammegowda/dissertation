@@ -1,0 +1,32 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+We study and address class imbalance problem under various tasks that model categorical distributions.
+Firstly, we consider a simple case: image classification task where labels are imbalanced categorical distribution.
+And lastly, we consider a relatively complex task of machine translation where words are generated from target language vocabulary, which is an extremely imbalanced categorical distribution.
+
+Explore strategies for addressing imbalance during training. 
+Aim for improving performance on rare classes with either no damage to majority classes or with only a little trade-off. 
+
+\begin{enumerate}
+
+\item We begin with re envisioning NMT models, and create an high level abstraction of NMT that facilitates theoretical analysis. 
+Our abstraction of NMT consist of two well studied machine learning models: autoregressor and classifier.
+This abstraction enable us to analyze the strengths and weaknesses of NMT using the findings from other domains that study autoregressors and classifiers.
+
+\item By focusing on the classification component, we analyze how vocabulary size choices change class imbalance. Since byte-pair-encoding (BPE) subword vocabulary is the current de-facto vocabulary for NMT, we focus our efforts to BPE vocabulary sizes.
+BPE vocabulary size is known to impact overall performance, however, there is no explanation for why some BPE vocab sizes are better than others. 
+Currently, BPE vocab sizes are chosen based on trial and error, or with grid search, we offer a heuristic for selecting vocabulary size. 
+In addition, label smoothing is used in NMT models as a regularization technique, however, its effect on class imbalance is not understood. We uncover some of the mysteries of BPE and label smoothing from class balancing perspective.
+
+\item We prove that class imbalance is problematic in neural machine translation, and show that frequency based biases exist in NMT models.
+We show that the rare types that contain more \textit{information content} and hence are crucial in communicating the semantic of sentence often have poor performance. In comparison, we show that stop words that have less information-content have higher performance. 
+
+\item We show that the current evaluation metrics, contrary to many real-world applications, understate the importance of rare classes. 
+Since the rare classes contain more \textit{information}, we argue that rare classes are important too.
+We propose and justify an evaluation metric that consider data imbalance into account while evaluating.
+We justify empirically the use of \maf1 metric for NMT evaluation as the classes in natural language generation tasks are always imbalanced. 
+
+\item We propose training methods to address imbalance during training and improve overall performance.
+
+\end{enumerate}

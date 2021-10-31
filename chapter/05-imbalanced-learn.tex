@@ -1,0 +1,176 @@
+\chapter{Imbalanced Classification Learning}
+\label{ch:imb-learning}
+
+
+\section{Data based Methods}
+\subsection{Sampling Methods}
+These are similar to quota systems. 
+\begin{enumerate}
+    \item Random Up-sample or Over-sample Minority
+    \item Random Down-sample or Under-sample Majority
+\end{enumerate}
+
+
+\subsection{Augmentation Methods}
+
+\begin{enumerate}
+ \item Synthetic Minority Over-sample Technique (SMOTE): \citet{chawla2002smote}
+ \item Just add more data: law of diminishing returns favor minority classes more than majority classes. \citet{koehn2017sixchallenges} learning curve.
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Unequal Objectives}
+Preference based methods.
+
+Cross Entropy (CE) is the de-facto objective for deep learning classification models.
+Consider a dataset of $N$ examples, $$ D = \{(x^{(i)}, y^{(i)}) | i = 1, 2, 3, ... N\}$$
+where, ($x^{(i)}, y^{(i)})$ be (input, label), respectively.
+
+Let $p^(i)_c=p(y^{(i)}_c|x^{(i)})$ be model's output probability.
+
+CE between $y^{(i)}$ and $p^{(i)}$ (i.e., on an example $i$) is:
+
+\begin{equation}
+ CE^{(i)} = -\sum^C_{c} y^{(i)}_c\cdot \log(p^{(i)}_c)
+\end{equation}
+Often, $y^{(i)}$ is a one-hot vector of $C$ classes: $\{y_1, y_2, ... y_C\}$, which zero-out all but one terms in the above summation. However, we retain the generalization due to $y^{(i)}$ sometimes being non one-hot distribution, such as the label smoothing case (Section \ref{sec:label-smooth}).
+
+Models are generally optimized using batch gradient descent, hence, the mean CE on a batch of examples:
+
+\begin{equation} \label{eqn:ce-batch}
+ CE = - \frac{1}{N} \sum^N_{i=1}\sum^C_{c=1} y^{(i)}_c\cdot \log(p^{(i)}_c)
+\end{equation}
+
+\subsection{Weighted Cross Entropy (wCE)} is a simple way of addressing imbalanced classes by assigning unequal weights to classes.
+
+\begin{equation} \label{eqn:wce-batch}
+ wCE = -\frac{1}{N} \sum^N_{i=1} \sum^C_{c=1} w_c \cdot y^{(i)}_c \cdot \log(p^{(i)}_c)
+\end{equation}
+where $w_c$ is the weight associated with class $c$.
+Equation (\ref{eqn:ce-batch}) is a special case of (\ref{eqn:wce-batch}), obtained by  equal weights to all classes, i.e., $\forall c, w_c=1$.
+
+Weights can either be manually set or obtained using heuristics based on training data statistics, which are described in the following sections.
+Let $f_c$ be class $c$'s frequency in the training data; $\sum_{c=1}^C f_c = N$. 
+The following statistics are used for obtaining weights from frequency:
+
+\begin{enumerate}
+\item \textit{\textbf{Inverse Frequency:}}
+\begin{equation}
+ w_c \propto 1/f_c;\hspace{6mm} w_c = k/f_c
+\end{equation}
+Where $k$ is proportionality constant, usually min, median or max of $f$.
+
+\item \textit{\textbf{Inverse Log Frequency:}}
+\begin{equation}
+ w_c \propto 1/\log(f_c); \hspace{6mm} w_c = k/\log(f_c)
+\end{equation}
+
+\item \textit{\textbf{Inverse Square Root Frequency}}:
+\begin{equation}
+ w_c \propto 1/\sqrt{f_c};\hspace{6mm} w_c = k/\sqrt{f_c}
+\end{equation}
+
+
+\item \textit{\textbf{Effective Number of Samples}:}\\
+\citet{cui2019effective-samples} argue that the use of raw frequencies for weighing (such as with inverse frequency) is detrimental to model performance. 
+They propose effective number of samples for class $c$,  $1 \le E_c \le f_c $ , as an exponential function of $\beta \in [0,1)$, as
+
+$$E_c = \frac{1-\beta^{f_c}}{1-\beta}$$ 
+where $f_c$ is the raw frequency of class $c$ in training data.
+If $\beta=0$, $E_c=1$ and as $\beta\rightarrow1$, $E_c \rightarrow f_c$.
+
+\begin{equation}
+    w_c \propto \frac{1}{E_c}; \hspace{4mm} w_c = k\cdot \frac{1-\beta}{1-\beta^{f_c}}
+\end{equation}
+for some constant, $k > 0$.
+
+They also offer geometrical interpretation for $\beta=(N-1)/N$, where $N \ge 1$ is the volume of a hyper-space that can contain all the examples. 
+
+\end{enumerate}
+
+
+%https://www.desmos.com/calculator/xjedqqsbpm
+%begin{figure}
+%    \centering
+%    \includegraphics[width=\linewidth]{weight-fn.png}
+%    \caption{Weight functions}
+%    \label{fig:weight-fn-viz}
+%\end{figure}
+
+
+\subsection{Focal Loss}
+\label{sec:focal-loss}
+ Focal loss \cite{lin-etal-2020-focalloss} assigns higher loss for harder-to-learn examples.
+ Implicit assumption is that minority classes are harder to learn than the majority classes.
+Given $\gamma \ge 0$,
+\begin{equation}
+    FL^{(i)} = -\sum^C_{c=1} y^{(i)}_c \cdot (1-p^{(i)}_c)^\gamma \cdot \log(p^{(i)}_c) 
+\end{equation}
+However, noisy examples may have adverse effect on loss landscape (refer to \citet{cui2019effective-samples}).
+
+\section{Label Smoothing}
+\label{sec:label-smooth}
+Label smoothing \cite{szegedy2016re-inception} is a regularization technique.
+Given a hyper parameter $0 \le \varepsilon \le 1$, the ground truth $y$ is transformed from one-hot vector to a smooth distribution, as:
+\begin{equation}
+    y_c^* = \begin{cases}
+     1-\varepsilon & \text{if } y_c = 1 \\
+     \frac{\varepsilon}{C-1} & \text{otherwise, i.e. if } y_c=0
+    \end{cases}
+\label{eqn:label_smooth}
+\end{equation}
+Intuitively, $\varepsilon$ quantity of probability mass is moved from the correct class (i.e $y_c=1$) and evenly distributed to all other classes (i.e. $y_c=0)$.
+All the benefits of label smoothing are not well understood; e.g. \citet{muller-2019-when-labelsmooth} show that label smoothing helps in tighter label cluster formation in hidden space, and model calibration.
+We conjecture that label smoothing may also be helping imbalanced classes. 
+With the smoothing transformation, though all classes gain equal quantity of probability mass, the classes that occur more frequently lose more mass compared to classes that occur only rarely. 
+
+When combined with weighted cross entropy:
+\begin{equation}
+ lswCE^{(i)} = -\sum^C_{c=1} w_c \cdot y^{*(i)}_c \cdot \log(p^{(i)}_c)
+\end{equation}
+
+
+\section{Proposed Methods}
+
+In this section, we describe our proposed methods for imbalanced learning.
+\subsection{Information Content as Weights}
+
+\cite{shannon1948mathematical}
+\begin{equation}
+   w_c = -\log_2(\pi_c)
+\end{equation}
+where $\pi_c$ is probability of class $c$ in training (i.e. prior), obtained as: $$\pi_c = \frac{f_c}{\sum^C_{c'=1}f_{c'}}$$\\
+
+
+\subsection{Macro Cross Entropy}
+Modify the loss function; take macro average
+
+Currently, the weighted CE is:
+\begin{equation*}
+ wCE = -\frac{1}{N} \sum^N_{i=1} \sum^C_{c=1} w_c \cdot y^{(i)}_c \cdot \log(p^{(i)}_c)
+\end{equation*}
+
+
+We define \textbf{Macro CE} as
+\begin{equation} \label{eqn:mCE-batch}
+  mCE = -\sum^C_{c=1} \frac{1}{\sum^{N}_{j=1} y^{(j)}_c} \sum^N_{i=1} y^{(i)}_c \cdot \log(p^{(i)}_c)
+\end{equation}
+
+If the labels are one-hot vectors, then $\sum^{N}_{j=1} y^{(j)}_c = f_c$. 
+Note that, Macro CE (\ref{eqn:mCE-batch}) is equivalent, in theory, to Weighted CE (\ref{eqn:wce-batch}) with $w_c = 1/\sum^{N}_{j=1} y^{(j)}_c$.
+Macro CE easily adapts to the imbalance in each min-batch as well as to the smoothed labels, where as Weighted CE has global weights and do not account for smoothed labels.
+
+\subsection{Balanced Label Smoothing}
+Let $w_c$ be the weight of class such that $\forall c, w_c > 0$ and $\sum_c w_c = 1$.
+
+Instead of distributing $\varepsilon$ evenly across all other classes, distribute more quantity to the heavily weighted classes (such as the rare ones), and less to the lightly weighted classes. 
+ Let $c$ be a class with $y_c=1$ from which $\varepsilon$ quantity of probability mass is moved out.
+ 
+ Let $d$ be another class that receives, i.e., $d \ne c$ and $y_d=0$.  
+  Instead of $y^*_d = \frac{1}{C-1} \cdot \varepsilon$, as in Equation (\ref{eqn:label_smooth}), $y^*_d = w_d \cdot \varepsilon$. 
+  
+  For simplicity\footnote{to ensure $\sum_i y^*_i = 1$}, $y^*_c = 1-\varepsilon + w_c \cdot \varepsilon = 1-\varepsilon(1-w_c)$
+  
+
+Related: Adaptive label smoothing \cite{wang-2021-adalabel}

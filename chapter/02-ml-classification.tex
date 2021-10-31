@@ -1,0 +1,30 @@
+\chapter{Machine Learning Classification Modeling}
+
+TODO:
+1. Classification: traditional and deep learning
+2. Traditional: naive bayes, SVM, decision trees, ...
+3. Deep learning models: feed forward nets, RNNs, CNNs, Transformers, 
+
+
+Machine learning is a field of study that enables creation of machines capable of learning from data instead of explicitly programming them.
+
+Training and Prediction. \\ 
+Random variables - discrete and continuous. -- Classification and Regression \\
+Sometimes we convert continuous variables into discrete variables, e.g. quantization \\
+
+Classification: binary and multi-class.  Single-label vs multi-label.
+
+
+
+\section{NMT}
+\subsection{NMT Architectures}
+\label{sec:rel-nmt-arch}
+Several variations of NMT models have been proposed and refined: \citet{sutskever2014seq2seq} and \citet{cho2014learning} introduce the RNN-based encoder-decoder model. 
+\citet{bahdanau2014nmtattn} introduce the attention mechanism and \citet{luong2015effectiveAttn} propose several variations that became essential components of many future models.
+RNN modules, either LSTM \cite{hochreiter1997LSTM} or GRU \cite{cho-etal-2014-properties}, have been popular choices for composing NMT encoders and decoders. 
+The encoder uses bidirectional information, but the decoder is unidirectional, typically left-to-right, to facilitate autoregressive generation.
+\citet{gehring2017CNNMT} use a CNN architecture that outperforms RNN models.
+\citet{vaswani2017attention} propose the \textbf{Transformer}, whose main components are feed-forward and attention networks. 
+There are only a few models that perform non-autoregressive NMT \cite{libovicky-helcl-2018-end,Gu-etal-17-NonAR-NMT}.
+These are focused on improving the speed of inference; generation quality is currently sub-par compared to autoregressive models.
+These non-autoregressive models can also be viewed as token classifiers with a different kind of feature extractor, whose strengths and limitations are yet to be theoretically understood.

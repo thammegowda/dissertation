@@ -1,0 +1,153 @@
+\usepackage[T1]{fontenc}
+\usepackage[tt=false, type1=true]{libertine} 
+\usepackage[varqu]{zi4}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[libertine]{newtxmath}
+
+
+% Packages required by `USCthesis.sty`.
+\usepackage{setspace}
+\usepackage{tabularx}
+%\usepackage{biblatex}
+
+% Filler text for formatting. Comment these lines out for real writing.
+% \usepackage[english]{babel}
+% \usepackage{blindtext}
+
+%\usepackage{times}
+\usepackage{microtype}
+% \usepackage{latexsym}
+
+
+\usepackage{hyperref}
+\usepackage{xcolor}		% make links dark blue
+\definecolor{darkblue}{rgb}{0, 0, 0.5}
+\hypersetup{colorlinks=true,citecolor=black, linkcolor=black, urlcolor=darkblue}
+\hypersetup{colorlinks=true, citecolor=darkblue, linkcolor=black, urlcolor=darkblue}
+  
+
+\usepackage{makecell}
+\usepackage{lscape} 
+\usepackage{subcaption}
+\usepackage{latexsym}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{comment}
+\usepackage{arydshln}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{xspace}
+%\usepackage{textgreek}
+\usepackage{booktabs}
+\usepackage{tocbibind}
+\usepackage{epigraph} 
+
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+
+\usepackage{color}
+\usepackage[finalizecache,cachedir=minted-cache]{minted} 
+\usepackage{tikz}
+\usepackage[normalem]{ulem}
+
+\usetikzlibrary{positioning,fit,calc,backgrounds}
+\tikzset{block/.style={draw,thick,text width=2cm,minimum height=1cm,align=center},
+         line/.style={-latex}
+}
+\makeatletter
+\def\ruwave{\bgroup \markoverwith{\lower3.5\p@\hbox{\textcolor{red}{\sixly \char58}}}\ULon}
+\font\sixly=lasy6
+\makeatother
+
+
+% Weiqiu
+\usepackage{wasysym}
+\usepackage{etoolbox}
+\usepackage{siunitx}
+\robustify\bfseries
+\sisetup{
+ table-number-alignment=right,
+ table-text-alignment=right,
+ detect-weight,
+ detect-shape,
+ mode=math,
+ math-rm=\mathtt
+}
+% \usepackage{enumitem}
+\newcommand{\subscript}[2]{$#1 _ #2$}
+
+\usepackage{natbib}
+%\usepackage[nottoc,numbib]{tocbibind}
+\renewcommand\cite{\citep}	% to get "(Author Year)" with natbib    
+%\newcommand\shortcite{\citeyearpar} % to get "(Year)" with natbib    
+\newcommand\newcite{\citet}	 % to get "Author (Year)" with natbib   
+
+
+\usepackage{graphicx}
+\graphicspath{{img/}{img/optimvocab/}}
+
+
+\newlength\myheight
+\newlength\mydepth
+\settototalheight\myheight{Xygp}
+\settodepth\mydepth{Xygp}
+\setlength\fboxsep{0pt}
+\newcommand*\inlinegraphics[1]{%
+  \settototalheight\myheight{Xygp}%
+  \settodepth\mydepth{Xygp}%
+  \raisebox{-\mydepth}{\includegraphics[height=\myheight]{#1}}%
+}
+
+
+\newcommand\BibTeX{B\textsc{ib}\TeX}
+\newcommand{\bleu}{{\textsc{Bleu}}}
+\newcommand{\chr}[2]{{C\small{HR}{#1}$_{{#2}}$}}
+\newcommand{\chrx}[1]{\text{\small{CHR}\large{#1}}}
+
+\newcommand{\chrf}[1]{\textsc{ChrF}{$_{#1}$}}
+\newcommand{\bleufx}[1]{{B\small{LEU}F$_{{#1}}$}}
+\newcommand{\bleuf}{{\textsc{BleuF}}}
+
+\newcommand{\maf}[1]{\textsc{MacroF}{\text{$_{{#1}}$}}}
+\newcommand{\mif}[1]{\textsc{MicroF}{\text{$_{{#1}}$}}}
+\newcommand{\mableu}{\textsc{MacroBleu}}
+\newcommand{\mibleu}{\textsc{MicroBleu}}
+\newcommand{\blrtmn}{\textsc{BLEURT}\text{\footnotesize{}mean}}
+\newcommand{\blrtmd}{\textsc{BLEURT}\text{\footnotesize{}median}}
+
+%\usepackage{amssymb}
+\newcommand{\deleterious}[3]{{\Large\frownie{}}_{#1\to#2}^{#3}}
+\newcommand{\beneficial}[3]{{\Large\smiley{}}_{#1\to#2}^{#3}}
+\newcommand{\scoredel}[3]{\delta_{#3}^{#1^{#2}}}
+
+
+
+
+
+\newcommand{\colorann}[3]{\textcolor{#1}{${}^{#2}[$#3$]$}}
+\newcommand{\tg}[1]{\colorann{blue}{TG}{#1}}
+%\newcommand{\colorann}[3]{\textcolor{#1}{${}^{#2}[$#3$]$}}
+%\newcommand{\jon}[1]{\colorann{red}{Jon}{\footnotesize #1}}
+%\newcommand{\tg}[1]{\colorann{cyan}{TG}{\footnotesize #1}}
+%\newcommand{\wy}[1]{\colorann{orange}{WY}{\footnotesize #1}}
+%\newcommand{\cl}[1]{\colorann{green}{CL}{\footnotesize #1}}
+
+\newcommand{\insig}{$^{\times}$}
+
+
+
+\newcommand{\mtdata}{\textsc{MTData}}
+\newcommand{\nlcodec}{\textsc{NLCodec}}
+\newcommand{\nldb}{\textsc{NLDb}}
+\newcommand{\rtg}{\textsc{RTG}}
+
+\newcommand{\sentpiece}{SentencePiece}
+\newcommand{\sacrebleu}{\textsc{SacreBleu}}
+\newcommand{\hftok}{HuggingfaceTokenizers}
+
