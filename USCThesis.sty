@@ -949,6 +949,16 @@
   \end{singlespace}
 }
 
+\def\mytoc{%
+  \newpage
+  \pdfbookmark{Table of Contents}{Table of Contents}
+  \chapter*{Table of Contents}%
+  \begin{singlespace}
+    \vskip -1em
+    \@starttoc{toc}%
+  \end{singlespace}
+}
+
 \def\listoftables{%
   \@ifstar
     {\@ifnextchar [%
@@ -1202,6 +1212,7 @@
 \def\endsaying{%
   \endtrivlist
   \vspace{20pt}}
+
 
 %%
 %% Define the starting pagestyle

@@ -1,0 +1,62 @@
+\chapter{Learning with a Preference}
+\label{ch:affirmative-action}
+
+
+
+\setlength{\epigraphwidth}{5.6in} 
+\epigraph{\textit{``The test of our progress is not whether we add more to the abundance of those who have much; it is whether we provide enough for those who have too little."} --- Franklin D. Roosevelt, 1937}
+
+%ML applications are being deployed in human society; they are automating many services historically handled by humans.
+
+Human society is imbalanced in various forms, e.g., people are categorized based on their gender, age, race, religious affiliation, and nationality, which results in imbalanced classes.
+This imbalance leads to the formation of majority and minority groups in society.
+%Policies such as reservations and quota systems are made to address.
+In this chapter, we consider the policies and strategies aimed to address the societal imbalance as an opportunity to study and translate them into the machine learning setting.
+When policies are decided based on the support or benefit of the majority of citizens, the minority groups have little say in such a system and minorities have the risk of being overlooked. 
+The historic negative discrimination towards minority classes affects the opportunities of disadvantaged groups and their fair competitiveness.
+To combat this historical negative discrimination, several governing bodies either encourage or mandate positive discrimination towards minority categories.
+These positive discriminations -- called Affirmative Action (AA) \cite{affirmative-action} -- are a set of policies and strategies installed by government aiming to boost the career and educational opportunities for minority groups.  
+Since the opportunities in most competitive settings are of zero-sum game, boosting the minority groups implies that the majority groups are deliberately put to a disadvantage.
+Similar to how the negative discrimination is problematic, even the positive discrimination can also be problematic, and it is controversial, especially since it violates the notion of equality. 
+However, some social scientists argue that there is some merit to the positive discrimination if the intention is to reverse the imbalance that already exists, especially if it can be accomplished without significantly hurting the majority categories.
+%\footnote{``\textit{The test of our progress is not whether we add more to the abundance of those who have much; it is whether we provide enough for those who have too little.}" -- Franklin D. Roosevelt, 1937. \url{https://www.fdrlibrary.org/fdr}; accessed: June 2021.}
+LwP methods are broadly classified into two kinds: (1) quota-based in which a certain percent of opportunities is reserved for disadvantaged groups, and (2) preference-based in which disadvantaged groups are given a special preference in the selection process.
+
+We rephrase it more concretely as the following questions: 
+Since ML techniques deal with statistics from imbalanced categories in which some categories are at a disadvantage, we wonder if \textit{learning with preference (LwP)} to boost the performance of minorities (i.e., rare phenomena in datasets) is a good idea.
+\begin{enumerate}
+    \item When LwP is required in ML?
+    \item What are the ethical implications of having LwP in ML?
+    \item How to quantify the impact of LwP in ML?
+    \item What LwP approaches are most effective in ML?
+\end{enumerate}
+
+The above questions are addressed briefly in the following subsections:
+
+\section{When LwP is required in ML?}
+ML techniques perform well on, and often favorably biased towards, the majority classes. 
+If the performance of majority classes is more important than the minority classes, then LwP methods are not needed.
+In some extreme cases of such scenarios, the ML itself may not be needed, as one could  ignore minority classes and simply assign a majority category label to \textit{all} examples.
+More often in practice, the classifier performance on minority classes is at least as important, if not more, as that of majority classes.
+Even in such scenarios, if ML techniques are fair and just for all categories, then LwP is not needed. 
+However, an extensive body of work confirms that in the presence of imbalanced categories, ML techniques are often unfavorably biased towards minority categories.
+Hence, LwP (i.e., positive discrimination) is required to counteract the frequency-based biases and achieve better performance across all classes and especially the minority classes. 
+
+\section{Ethical implications of having LwP in ML}
+TODO:
+
+No free-lunch theorem.
+
+\section{How to quantify the impact of LwP in ML?}
+Evaluation metrics are a key component of ML pipeline.
+To assess the impact of LwP, we need evaluation metrics that offer performance breakdown to the granularity of individual categories.
+Some metrics, e.g. \textit{accuracy},  offer only the system's overall performance and not its breakdown to individual categories, and hence they are less useful.
+By using metrics that break down scores to each category, we can directly compare the difference in performance between the baseline non-LwP versus LwP methods for all categories individually.
+LwP method is effective if it has a significant performance improvement for crucial categories without significantly hurting the performance of other less-important categories. 
+Although we do not aim for reducing the performance on less-important classes, in practice, due to the zero-sum game nature of the setting, there may be negative impact on some categories.
+
+\section{What LwP approaches are effective in ML?}
+Efforts towards addressing imbalance in the context of ML classifiers are as follows:
+\textit{Imbalanced learning} are some of the techniques that favor minority classes by counteracting the inherent frequency based biased of ML modeling.
+% We survey, and report in detail in Chapter ~\ref{ch:imb-learning}.
+The recent trend is to simply add more training examples; although the imbalance ratio retains,  due to the \textit{`law of diminishing returns'}, the minority classes are often benefited more than majority classes from adding more training examples.

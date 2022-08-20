@@ -1,0 +1,250 @@
+
+\chapter{Related Work}
+\label{ch:related-work}
+
+\setlength{\epigraphwidth}{5.6in} 
+\epigraph{\textit{``If I have seen further it is by standing on the shoulders of Giants."} --- Sir Isaac Newton, 1675}
+
+
+In this chapter, we review the related work, organized in the following sections.
+
+%%%%% Finding the optimal vocabulary
+%\section{Finding the Optimal Vocabulary}
+
+
+\section{Rare Phenomena Learning}
+\label{sec:rel-class-imb}
+The class imbalance problem has been extensively studied in classical ML \cite{japkowicz2002ClassImbalance}.
+In the medical domain, \citet{Maciej2008MedicalImbalance} find that classifier performance deteriorates with even modest imbalance in the training data.
+Untreated class imbalance is known to deteriorate the performance of image segmentation.  \citet{Sudre2017GeneralizedDice} investigate the sensitivity of various loss functions.
+\citet{Johnson2019SurveyImbalance} survey imbalance learning and report that the effort is mostly targeted to computer vision tasks.
+\citet{buda-etal-2018-imbalance-cnn} provide a definition and quantification method for two types of class imbalance: \textit{step imbalance} and \textit{linear imbalance}.
+Since the imbalance in Zipfian distribution of classes is neither single-stepped nor linear, we use a divergence based measure to quantify imbalance.
+
+
+
+\section{Rare Words at Training}
+
+\citet{sennrich-etal-2016-bpe} introduce BPE as a simplified way to avoid out-of-vocabulary (OOV) words without having to use a back-off dictionary.
+They note that BPE improves the translation of not only the OOV words, but also some rare in-vocabulary words.
+The analysis by \citet{morishita-etal-2018-improving} is different from ours in that they view various vocabulary sizes as hierarchical features that are used in addition to a fixed vocabulary.
+\citet{DBLP:journals/corr/abs-1810-08641} offer an efficient way to search BPE vocabulary size for NMT.
+\citet{kudo-2018-subwordreg} use BPE as a regularization technique by introducing sampling based randomness to the BPE segmentation. 
+To the best of our knowledge, no prior works analyze BPE's effect on class imbalance.
+
+
+\begin{comment}
+
+%\subsection{Data based Methods}
+\subsection{Sampling Methods}
+These are similar to quota systems. 
+\begin{enumerate}
+    \item Random Up-sample or Over-sample Minority
+    \item Random Down-sample or Under-sample Majority
+\end{enumerate}
+
+
+\subsection{Augmentation Methods}
+
+\begin{enumerate}
+ \item Synthetic Minority Over-sample Technique (SMOTE): \citet{chawla2002smote}
+ \item Just add more data: law of diminishing returns favor minority classes more than majority classes.
+ % \citet{koehn2017sixchallenges} learning curve.
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%
+%\subsection{Unequal Objectives}
+
+\subsection{Weighted Cross Entropy (wCE)} is a simple way of addressing imbalanced classes by assigning unequal weights to classes.
+
+Cross Entropy (CE) is the de facto objective for deep learning classification models.
+Consider a dataset of $N$ examples, $$ D = \{(x^{(i)}, y^{(i)}) | i = 1, 2, 3, ... N\}$$
+where, ($x^{(i)}, y^{(i)})$ be (input, label), respectively.
+
+Let $p^(i)_c=p(y^{(i)}_c|x^{(i)})$ be the model's output probability.
+
+CE between $y^{(i)}$ and $p^{(i)}$ (i.e., on an example $i$) is:
+
+\begin{equation}
+ CE^{(i)} = -\sum^C_{c} y^{(i)}_c\cdot \log(p^{(i)}_c)
+\end{equation}
+Often, $y^{(i)}$ is a one-hot vector of $C$ classes: $\{y_1, y_2, ... y_C\}$, which zero-out all but one terms in the above summation. However, we retain the generalization due to $y^{(i)}$ sometimes being non one-hot distribution, such as the label smoothing case.% (Section \ref{sec:label-smooth}).
+
+Models are generally optimized using batch gradient descent, hence, the mean CE on a batch of examples:
+
+\begin{equation} \label{eqn:ce-batch}
+ CE = - \frac{1}{N} \sum^N_{i=1}\sum^C_{c=1} y^{(i)}_c\cdot \log(p^{(i)}_c)
+\end{equation}
+
+
+\begin{equation} \label{eqn:wce-batch}
+ wCE = -\frac{1}{N} \sum^N_{i=1} \sum^C_{c=1} w_c \cdot y^{(i)}_c \cdot \log(p^{(i)}_c)
+\end{equation}
+where $w_c$ is the weight associated with class $c$.
+Equation (\ref{eqn:ce-batch}) is a special case of (\ref{eqn:wce-batch}), obtained by  equal weights to all classes, i.e., $\forall c, w_c=1$.
+
+Weights can either be manually set or obtained using heuristics based on training data statistics, which are described in the following sections.
+Let $f_c$ be class $c$'s frequency in the training data; $\sum_{c=1}^C f_c = N$. 
+The following statistics are used for obtaining weights from frequency:
+
+\begin{enumerate}
+\item \textit{\textbf{Inverse Frequency:}}
+\begin{equation}
+ w_c \propto 1/f_c;\hspace{6mm} w_c = k/f_c
+\end{equation}
+Where $k$ is proportionality constant, usually min, median or max of $f$.
+
+\item \textit{\textbf{Inverse Log Frequency:}}
+\begin{equation}
+ w_c \propto 1/\log(f_c); \hspace{6mm} w_c = k/\log(f_c)
+\end{equation}
+
+\item \textit{\textbf{Inverse Square Root Frequency}}:
+\begin{equation}
+ w_c \propto 1/\sqrt{f_c};\hspace{6mm} w_c = k/\sqrt{f_c}
+\end{equation}
+
+
+\item \textit{\textbf{Effective Number of Samples}:}\\
+\citet{cui2019effective-samples} argue that the use of raw frequencies for weighing (such as with inverse frequency) is detrimental to model performance. 
+They propose the effective number of samples for class $c$,  $1 \le E_c \le f_c $ , as an exponential function of $\beta \in [0,1)$, as
+
+$$E_c = \frac{1-\beta^{f_c}}{1-\beta}$$ 
+where $f_c$ is the raw frequency of class $c$ in training data.
+If $\beta=0$, $E_c=1$ and as $\beta\rightarrow1$, $E_c \rightarrow f_c$.
+
+\begin{equation}
+    w_c \propto \frac{1}{E_c}; \hspace{4mm} w_c = k\cdot \frac{1-\beta}{1-\beta^{f_c}}
+\end{equation}
+for some constant, $k > 0$.
+
+They also offer geometrical interpretation for $\beta=(N-1)/N$, where $N \ge 1$ is the volume of a hyper-space that can contain all the examples. 
+\end{enumerate}
+
+%https://www.desmos.com/calculator/xjedqqsbpm
+%begin{figure}
+%    \centering
+%    \includegraphics[width=\linewidth]{weight-fn.png}
+%    \caption{Weight functions}
+%    \label{fig:weight-fn-viz}
+%\end{figure}
+
+
+\subsection{Focal Loss}
+\label{sec:focal-loss}
+ Focal loss \cite{lin-etal-2020-focalloss} assigns higher loss for harder-to-learn examples.
+ The implicit assumption is that minority classes are harder to learn than the majority classes.
+Given $\gamma \ge 0$,
+\begin{equation}
+    FL^{(i)} = -\sum^C_{c=1} y^{(i)}_c \cdot (1-p^{(i)}_c)^\gamma \cdot \log(p^{(i)}_c) 
+\end{equation}
+However, noisy examples may have adverse effect on loss landscape (refer to \citet{cui2019effective-samples}).
+
+\end{comment}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Macro Average}
+
+\section{Rare Words at Evaluation} %MT Metrics:
+ Many metrics have been proposed for MT evaluation, which we broadly categorize into \textit{model-free} or \textit{model-based}. Model-free metrics compute scores based on translations but have no significant parameters or hyperparameters that must be tuned \textit{a priori}; these include  \bleu\ \cite{papineni-etal-2002-bleu}, NIST \cite{doddington-2002-NIST}, TER \cite{snover2006TER}, and \chrf1 \cite{popovic-2015-chrf}.  Model-based metrics have a significant number of parameters and, sometimes, external resources that must be set prior to use. These include METEOR \cite{banerjee-lavie-2005-meteor},  BLEURT \cite{sellam-etal-2020-bleurt}, YiSi \cite{lo-2019-yisi}, ESIM \cite{mathur-etal-2019-ESIM}, and BEER \cite{stanojevic-simaan-2014-beer}. Model-based metrics require significant effort and resources when adapting to a new language or domain, while model-free metrics require only a test set with references. 
+
+\citet{mathur-etal-2020-tangled} have recently evaluated the utility of popular metrics and recommend the use of either \chrf1 or a model-based metric instead of \bleu. 
+We compare our \maf1 and \mif1 metrics with \bleu, \chrf1, and BLEURT \cite{sellam-etal-2020-bleurt}. 
+While \citet{mathur-etal-2020-tangled} use Pearson's correlation coefficient ($r$) to quantify the correlation between automatic evaluation metrics and human judgements, we instead use Kendall's rank coefficient ($\tau$), since $\tau$ is more robust to outliers than $r$ \cite{croux2010robust-correlation}. 
+
+\subsection{Rare Words are Important}
+\label{sec:rare-words}
+That natural language word types roughly follow a Zipfian distribution is a well known phenomenon \cite{zipf1949human,powers-1998-zipf-apps}.
+The frequent types are mainly so-called ``stop words,'' function words, and other low-information types, while most content words are infrequent types.
+To counter this natural frequency-based imbalance, statistics such as inverted document frequency (IDF) are commonly used to weigh the \textit{input} words in applications such as information retrieval~\cite{Jones72specificity}.
+In NLG tasks such as MT, where words are the \textit{output} of a classifier, there has been scant effort to address the imbalance.
+\citet{doddington-2002-NIST} is the only work we know of in which the `information' of an n-gram is used as its weight, such that rare n-grams attain relatively more importance than in BLEU. 
+We abandon this direction for two reasons:
+Firstly, as noted in that work, \textit{large amounts of data are required to estimate n-gram statistics}.
+Secondly, unequal weighing is a bias that is best suited to datasets where the weights are derived from, and such biases often do not generalize to other datasets.
+Therefore, unlike \citet{doddington-2002-NIST}, we assign equal weights to all n-gram classes, and in this work we limit our scope to unigrams only.
+
+While \bleu{} is a precision-oriented measure, METEOR \cite{banerjee-lavie-2005-meteor} and CHRF \cite{popovic-2015-chrf} include both precision and recall, similar to our methods.
+However, neither of these measures try to address the natural imbalance of class distribution. 
+BEER \cite{stanojevic-simaan-2014-beer} and METEOR \cite{denkowski-lavie-2011-meteor1.3} make an explicit distinction between function and content words; such a distinction inherently captures frequency differences since function words are often frequent and content words are often infrequent types. However, doing so requires the construction of potentially expensive linguistic resources. This work does not make any explicit  distinction and uses naturally occurring type counts to effect a similar result.
+
+\subsection{F-measure as an Evaluation Metric}
+F-measure \cite{Rijsbergen-1979-F-meas, chinchor-1992-F-meas} is extensively used as an evaluation metric in classification tasks such as part-of-speech tagging, named entity recognition, and sentiment analysis \cite{derczynski-2016-f-score}.
+Viewing MT as a multi-class classifier is a relatively new paradigm \cite{gowda-may-2020-finding}, and evaluating MT solely as a multi-class classifier as proposed in this work is not an established practice.
+However, $F_1$ measure is sometimes used for various analyses when \bleu{} and others are inadequate: The \texttt{compare-mt} tool \citep{neubig-etal-2019-compareMT} supports comparison of MT models based on $F_1$ measure of individual types.
+\citet{gowda-may-2020-finding} use $F_1$ of individual types to uncover frequency-based bias in MT models.
+\citet{sennrich-etal-2016-bpe} use corpus-level \textit{unigram $F_1$} in addition to \bleu\ and \chrf{}, however, corpus-level $F_1$ is computed as \mif1.
+To the best of our knowledge, there is no previous work that clearly formulates the differences between micro- and macro- averages, and justifies the use of \maf1 for MT evaluation. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%SECTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Robustness to Rare Styles }
+
+% \paragraph{\textbf{Multilingual NMT}} Training translation models that are capable of translating several pairs at the same time has been pursued due to several desirable effects.
+% \mg{This might not be necessary as it might end up being a repetition of what we have in the introduction.}
+
+\paragraph{Machine Translation Robustness:} MT robustness has been investigated before within the scope of bilingual translation settings.
+% going from a single source language to a single target language.
+Some of those efforts include robustness against input perturbations \cite{cheng-etal-2018-towards}, naturally occurring noise \cite{vaibhav-etal-2019-improving}, and domain shift \cite{muller-etal-2020-domain}.
+However, as we have shown in this work, multilingual translation models can introduce new aspects of robustness to be desired and evaluated.
+The robustness checklist proposed by \citet{ribeiro-etal-2020-beyond} for NLP modeling in general does not cover translation tasks, whereas our work focuses entirely on the multilingual translation task.
+
+\paragraph{Augmentation Through Concatenation:} Concatenation has been used before as a simple-to-incorporate augmentation method. Concatenation can be limited to consecutive sentences as a means to provide extended context for translation \cite{tiedemann-scherrer-2017-neural,Agrawal2018ContextualHI}, or additionally include putting random sentences together, which has been shown to result in gains under low resource settings \cite{nguyen-etal-2021-data,kondo-etal-2021-sentence}. While in a multilingual setting such as ours, data scarcity is less of a concern as a result of combining multiple corpora, concatenation is still helpful to prepare the model for scenarios where language switching is plausible.
+Besides data augmentation, concatenation has also been used to train multi-source NMT models. Multi-source models \cite{och-ney-2001-statistical} translate multiple semantically-equivalent source sentences into a \textit{single} target sentence. \newcite{DBLP:journals/corr/DabreCK17} show that by concatenating the source sentences (equivalent sentences from different languages), they are able to train a single-encoder NMT model that is competitive with models that use separate encoders for different source languages.
+Backtranslation \cite{sennrich-etal-2016-improving} is another useful method for data augmentation, however it is more expensive when the source side has many languages, and does not focus on language switching. 
+
+\paragraph{Attention Weights:} Attention mechanism \cite{Bahdanau-2015-nmt} enables the NMT decoder to choose which part of the input to \textit{focus} on during its stepped generation. The attention distributions learned while training a machine translation model, as an indicator of the context on which the decoder is focusing, have been used to obtain word alignments \cite{garg-etal-2019-jointly,DBLP:journals/corr/abs-1901-11359,zenkel-etal-2020-end,chen-etal-2020-accurate}. In this work, by visualizing attention weights, we depict how augmenting the training data guides attention to more neatly focus on the sentence of interest while decoding its corresponding target sentence. We are also able to quantify this by the introduction of the attention bleed metric.
+
+
+%\section{500-English MT}
+\section{Rare Languages}
+
+%\subsection{Multilingual NMT}
+\citet{johnson-etal-2017-googleNMT} show that NMT models are capable of multilingual translation without any architectural changes, and observe that when languages with abundant data are mixed with low resource languages, the translation quality of low resource pairs are significantly improved. They use a private dataset of 12 language pairs; we use publicly available datasets for up to 500 languages. % with varying amounts of training data, aiming to improve translation of low resource languages. 
+%\citet{neubig-hu-2018-rapid,gheini2019universal} show that pretrained multilingual NMT models are useful for adapting to low resource language pairs, which is one of the value of our pretrained model.
+\citet{qi-etal-2018-pretrainemb} assemble a multi-parallel dataset for 58 languages from TEDTalks domains, which are included in our dataset. 
+\citet{aharoni-etal-2019-massively} conduct a study on massively multilingual NMT, use a dataset having 102 languages which is not publicly available.
+\citet{zhang-etal-2020-multiling-nmt} curate OPUS-100, a multilingual dataset of 100 languages sampled from OPUS, including test sets; which are used in this work.
+\citet{tiedemann-2020-tatoeba} have established a benchmark task for 500 languages, including single directional baseline models.
+\citet{wang-etal-2020-balancing} examine the language-wise imbalance problem in multilingual datasets and propose a method to address the imbalance using a scoring function.
+
+
+\section{MT Tools}
+\textsc{SacreBleu}~\cite{post-2018-sacrebleu} simplifies MT evaluation.
+\mtdata\ attempts to simplify training setup by automating training and validation dataset retrieval.
+\textsc{OPUSTools}~\cite{aulamo-etal-2020-opustools} is a similar tool however, it interfaces with OPUS servers only.
+Since the dataset index for \textsc{OPUSTools}~ is on a server, the addition of new datasets requires privileged access.
+In contrast, \mtdata\ is a client side library, it can be easily forked and extended to include new datasets without needing special privileges. 
+
+\textbf{\nlcodec:} 
+\nlcodec\ is a Python library for vocabulary management. It overcomes the multithreading bottleneck in Python by using PySpark.
+%It is made out of necessity to experiment with the core functionality of subword encoding schemes. 
+\sentpiece~\cite{kudo-richardson-2018-sentencepiece} and \hftok~\cite{wolf-etal-2020-transformers} are the closest alternatives in terms of features, however, modification is relatively difficult for Python users as these libraries are implemented in C++ and Rust, respectively.
+ %\nlcodec\ uses a tab-separated-values (TSV) format for model persistence, and \hftok\ uses JSON format; both of these are easily inspectable, however,
+In addition, \sentpiece\ uses a binary format for model persistence in favor of efficiency, which takes away the inspectability of the model state. 
+Retaining the ability to inspect models and modify core functionality is beneficial for further improving encoding schemes, e.g. subword regularization~\cite{kudo-2018-subwordreg}, BPE dropout~\cite{provilkov-etal-2020-bpedrop}, and optimal stop condition for subword merges~\cite{gowda-may-2020-finding}.
+FastBPE is another efficient BPE tool written in C++.\footnote{\url{https://github.com/glample/fastBPE}}  
+Subword-nmt~\cite{sennrich-etal-2016-bpe} is a Python implementation of BPE, and stores the model in an inspectable plain text format, however, it is not readily scalable to massive datasets such as the one used in this work.
+None of these tools have an equivalent to \nldb's mechanism for efficiently storing and retrieving variable length sequences for distributed training.
+
+
+\textbf{\rtg{}:}
+Tensor2Tensor \cite{vaswani-etal-2018-tensor2tensor} originally offered the Transformer \cite{vaswani-2017-attention} implementation using TensorFlow~\cite{tensorflow2015-whitepaper}; 
+our implementation uses PyTorch \cite{NEURIPS2019_Pytorch} following \textit{Annotated Transformer} \cite{rush-2018-annotated}.
+OpenNMT currently offers separate implementations for both PyTorch and TensorFlow backends~\cite{klein-etal-2017-opennmt,klein-etal-2020-opennmt}.
+As open-source toolkits evolve, many good features tend to propagate between them, leading to varying degrees of similarities. Some available NMT toolkits are:
+Nematus~\cite{sennrich-etal-2017-nematus}, 
+xNMT~\cite{neubig-etal-2018-xnmt}.
+Marian NMT~\cite{junczys-dowmunt-etal-2018-marian-fast},
+Joey NMT~\cite{kreutzer-etal-2019-joeynmt},
+Fairseq~\cite{ott-etal-2019-fairseq}, and 
+Sockey~\cite{hieber-etal-2020-sockeye}.
+An exhaustive comparison of these NMT toolkits is beyond the scope of our current work.
+
+
+
+% \tg{Attention bleed, related work: "Attention is not explanation"  and "Attention is not not explanation". Attention alignment \url{https://aclanthology.org/W18-6318.pdf} Also this paper: \url{https://aclanthology.org/2020.acl-main.146.pdf}}
+% % \mg{I'll look into these and add as related work shortly}
+% \mg{After taking a deeper look at these works, I think prior studies that look at attention and alignment are more relevant here than the attention \& explanation debate papers (Attention is not{ , not }explanation ). You are not taking attention as an explanation supporting a certain decision here; You are indeed looking at it from an alignment quality point of view. So that's what I'll be focusing on.}
+%%%%%%%%%%%%%%%%%%%%%%%%%%SECTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

@@ -1,9 +1,12 @@
 \usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
 \usepackage[tt=false, type1=true]{libertine} 
 \usepackage[varqu]{zi4}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{bbm}
 \usepackage[libertine]{newtxmath}
 
 
@@ -90,7 +93,11 @@
 
 
 \usepackage{graphicx}
+\usepackage{wrapfig}
 \graphicspath{{img/}{img/optimvocab/}}
+
+\usepackage[edges]{forest}
+\newcommand{\rulesep}{\unskip\ \vrule\ }
 
 
 \newlength\myheight
@@ -141,7 +148,6 @@
 \newcommand{\insig}{$^{\times}$}
 
 
-
 \newcommand{\mtdata}{\textsc{MTData}}
 \newcommand{\nlcodec}{\textsc{NLCodec}}
 \newcommand{\nldb}{\textsc{NLDb}}
@@ -151,3 +157,37 @@
 \newcommand{\sacrebleu}{\textsc{SacreBleu}}
 \newcommand{\hftok}{HuggingfaceTokenizers}
 
+
+\newcommand{\ind}[1]{\mathbbm{1}(#1)}
+
+%%%%%%%%%%% Robustness
+
+\usepackage{arydshln}
+% \usepackage[english]{babel} % English as the main language
+% docs: https://latex3.github.io/babel/guides/which-method-for-which-language.html
+\usepackage{enumitem}
+\usepackage{xcolor, soul}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{svg}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{inconsolata}
+
+
+%\newcommand{\colorann}[3]{\textcolor{#1}{${}^{#2}[$#3$]$}}
+%\newcommand{\jon}[1]{\colorann{red}{Jon}{\footnotesize #1}}
+%\newcommand{\tg}[1]{\colorann{green}{TG}{\footnotesize #1}}
+%\newcommand{\mg}[1]{\colorann{orange}{MG}{\footnotesize #1}}
+
+\definecolor{OliveGreen}{rgb}{0,0.6,0}
+
+\newcommand{\shortarrow}[1][4pt]{\mathrel{%
+   \hbox{\rule[\dimexpr\fontdimen22\textfont2-.2pt\relax]{#1}{1pt}}%
+   \mkern-4mu\hbox{\usefont{U}{lasy}{m}{n}\symbol{41}}}}
+
+\newcommand{\code}[1]{\mbox{\texttt{#1}}}
+%%%%%%%%%%%%%%%%%%%%%%%

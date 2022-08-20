@@ -1,0 +1,190 @@
+\chapter{Background: Machine Translation}
+\label{ch:ml-background}
+
+Machine translation (MT) is the problem of translating text from one natural language to another using machine learning (ML) methods. 
+An ML problem can be precisely defined as the problem of improving some measure of performance when executing some task, through some type of training experience~\cite{mitchell2017key}.
+The MT problem typically involves learning from a set of human translated text (also called \textit{parallel data}, or \text{bitext}) with the goal of producing human-like translations on unseen data.
+MT has been studied since the 1950s \cite{reifler1954first-cmt}, and more actively since the 1990s \cite{brown-etal-1988-statistical,brown-etal-1993-mathematics,knight1999statMT-tutorial}\footnote{\url{https://web.archive.org/web/20170310234937/https://www.statmt.org/survey}}.
+Currently, neural machine translation (NMT) \cite{sutskever2014seq2seq,vaswani-2017-attention} is the dominant MT paradigm, which is described in the following.
+
+
+
+\section{Neural Machine Translation}
+
+%MT is the problem of translating text from one natural language to another.
+Formally, MT is a sequence-to-sequence transduction task, i.e, a task of transforming sequences of form $x_{1:m} = x_1 x_2 x_3 ... x_m$ to the form $y_{1:n} = y_1 y_2 y_3 ... y_n$, where $x_{1:m}$ is in source language $X$ and $y_{1:n}$ is in target language $Y$. 
+Each item in the sequence is a discrete token, i.e., $\forall x_i \in V_X $ and $\forall y_j \in V_Y$,  where $V_X$ and $V_Y$ are vocabularies of $X$ and $Y$ languages, respectively.
+
+%\subsection{Neural Machine Translation}
+
+NMT uses artificial neural networks to achieve translation. 
+Historically, MT pipelines involved a set of independently optimized components such as parsers, word aligners, and language models.
+NMT simplifies the pipeline by enabling end-to-end optimization of all parameters to achieve the translation objective. 
+Even though there are many variations of NMT architectures, all share the common objective of:
+
+$$\hat\theta = \argmax_{\theta \in \Theta} \prod_{(x_{1:m}, y_{1:n}) \in \mathcal{D}} P(y_{1:n} | x_{1:m}; \theta)$$
+
+where $\theta$ is the set of all parameters, and $\mathcal{D}$ is a set of parallel sentences.
+For most cases, the above objective function is decomposed autoregressively as
+% \footnote{There are only a few models that perform non-autoregressive NMT \cite{libovicky-helcl-2018-end,Gu-etal-17-NonAR-NMT}. These are focused on improving the speed of inference; generation quality is currently sub-par compared to autoregressive models.} 
+$$\hat\theta = \argmax_{\theta \in \Theta} \prod_{(x_{1:m}, y_{1:n}) \in \mathcal{D}} \prod_{t=1}^{n} P(y_t | y_{<t}, x_{1:m}; \theta)$$ 
+
+Maximization of likelihood is equivalent to minimization of negative $\log$ likelihood:
+
+$$\hat\theta = - \argmin_{\theta \in \Theta} \sum_{(x_{1:m}, y_{1:n}) \in \mathcal{D}} \sum_{t=1}^{n} \log P(y_t | y_{<t}, x_{1:m}; \theta)$$
+
+In practice,
+$$\hat\theta = - \argmin_{\theta \in \Theta} \mathop{\mathbb{E}}_{(x_{1:m}, y_{1:n}) \in \mathcal{D}} \frac{1}{n} \sum_{t=1}^{n} \log P(y_t | y_{<t}, x_{1:m}; \theta)$$
+
+
+The discriminator function is commonly implemented as a pair of \textsc{Encoder-Decoder} networks.
+Formally,
+$$ P(y_t | y_{<t}, x_{1:m}) = \textsc{Decoder}(y_{<t}, \textsc{Encoder}(x_{1:m}; \phi); \psi)$$
+%$$ P(y_t | y_{<t}, x_{1:m}) = P(y_{<t} | a_t)$$
+Multiple implementations for \textsc{Encoder} and \textsc{Decoder} are available: recurrent neural networks (RNN) such as Long Short-Term Memory \cite{sutskever2014seq2seq,hochreiter1997LSTM} and Gated Recurrent Unit \cite{cho-etal-2014-properties,cho2014learning}, RNN with attention \cite{bahdanau2014nmtattn,luong2015effectiveAttn}, convolutional neural networks (CNN) \cite{gehring2017CNNMT} and Transformer \cite{vaswani-2017-attention}. 
+ We use Transformer for all our NMT experiments in the later chapters as it is the current best performing model.
+ We refer to \citet{rush-2018-annotated} for the implementation details of Transformer.
+
+At the inference time, the model's hypothesis sequence is generated in a loop, with $h_0=\code{<s>}$, a special token denoting the \textit{beginning-of-sequence}, until  $h_t=\code{[/s]}$, denoting the \textit{end-of-sequence}. Both \code{<s>} and \code{</s>} are special types added to vocabulary $V_Y$. Similarly, during the training time, the sequence $y_{1:n}$ has a prefix, $y_0=\code{<s>}$, and suffix, $y_{n+1}=\code{</s>}$, to resemble the inference time conditions.
+
+At each time step $t$ during inference, the hypothesis token is predicted as, 
+$$ h_t = \argmax_{c \in V_Y} P(c | h_{<t}, x_{1:m}) \text{, for } t=1, 2,  ... \text{ until } h_t = \code{</s>}$$
+
+The above greedy decision of choosing local maximum at each time step may lead to search errors.
+We use beam search to further improve the overall sequence generation quality.
+
+\section{Evaluation}
+\label{ch:background-sec:eval}
+
+Evaluation of ML models is essential to keep track of progress made on a task, to separate good ideas from the bad, and also to determine the best one among several competing choices. 
+Manual evaluation, although desired, is often slow, expensive, and infeasible.
+Hence, automatic evaluation metrics are used whenever possible. 
+The choice of evaluation metric varies from task to task. 
+The following sections describe common metrics used in classification and machine translation tasks. 
+
+\textbf{Notation:} consider a set of $C = \{ 1, 2, .. K \}$ classes, and a held-out set, $T = \{ (x^{(i)}, y^{(i)}, h^{(i)}) | i = 1, 2, 3, ... N \}$, where $x^{(i)}$ is the input, $y^{(i)} \in C$ is the ground truth (i.e., gold labels) and $h^{(i)} \in C$ is a prediction from an ML model (also known as the hypothesis). 
+Let $\ind{y^{(i)}, h^{(i)}}$ be an indicator function with unity value when arguments match, and zero otherwise.
+For notational simplicity, let $\ind{y^{(i)}, h^{(i)}, c} = \ind{y^{(i)}, h^{(i)}} \times \ind{h^{(i)}, c}.$
+
+
+\subsection{Classifier Evaluation}
+\label{ch:background-sec:cls-eval}
+Accuracy is one of the most simple and widely used evaluation metrics, which is computed as:
+% $$Accuracy=\frac{Correct}{Total}$$
+
+$$Accuracy = \frac{\sum_i^N \ind{y^{(i)}, h^{(i)}}}{N}$$
+
+Accuracy provides an overall system performance by treating each \textit{instance} equally. For a fine-grained performance report, we compute Precision ($P_c$) and Recall ($R_c$) measures separately for each class type ($c$) as: 
+
+$$P_c = \frac{\sum_i^N \ind{y^{(i)}, h^{(i)}, c}} {\sum_j^N \ind{h^{(j)}, c}}$$
+$$R_c = \frac{\sum_i^N \ind{y^{(i)}, h^{(i)}, c}} {\sum_j^N \ind{y^{(j)}, c}}$$
+
+F-measure combines both precision and recall metrics using harmonic mean, as:
+$$F_{\beta;c} = \frac{(1+\beta^2) \times P_c \times R_c}{(\beta^2 \times P_c) + R_c}$$
+
+where parameter $\beta$ controls the relative importance of precision and recall.
+While in most applications, precision and recall are equally important (i.e., $\beta=1$), in certain scenarios, recall may be more important than precision (or vice versa). For example, $\beta=2$ implies that recall is twice as important as precision.
+
+The overall performance of a classification system is obtained by taking an average of performance across all classes.
+
+$$WeightedF_\beta = \frac{\sum_{c=1}^K w_c \times F_{\beta;c}}{ \sum_{j=1}^K w_j}$$
+where $w_c$ is the weight assigned to class. 
+If the held-out dataset has balanced classes, i.e., all classes have approximately the same number of instances, the methodology used to average across classes is uninteresting.\footnote{The research community has avoided dealing with class imbalance by using balanced held-out sets; e.g., SNLI \cite{maccartney-manning-2008-snli}, CIFAR-\{10,100\} \cite{Krizhevsky-2009-CIFAR}, sentiment classification of IMDb reviews \cite{maas-etal-2011-imdbreview}, MultiNLI \cite{williams-etal-2018-multinli}, XNLI \cite{conneau-etal-2018-xnli}.} 
+
+However, in the imbalanced classes scenarios, the averaging methodology requires careful consideration. There are two schools of thought about choice for $w_c$:
+
+\begin{itemize}
+\item \textbf{Micro-averaging:} Treats each \textit{instance equally}, i.e., $w_c = freq(c) = \sum_{i=1}^N \ind{y^{(i)}, c}$. 
+In this method, classes with more instances (i.e., majority classes) have a huge impact on system performance compared to classes with fewer instances (i.e., minority classes).
+
+\begin{equation}\label{eq:microf}
+  MicroF_\beta = \frac{\sum_{c=1}^K freq(c) \times F_{\beta;c}}{N}  
+\end{equation}
+
+%where $freq(c)$ is the frequency of c in ground truth, i.e., $freq(c) = \sum_{i=1}^N \ind{y^{(i)}, c}$
+In problems having exactly one label per instance (i.e., not multi-label classification), both micro-precision ($MicroP$) and micro-recall ($MicroP$) are equal to \textit{accuracy}, which is equivalent to $MicroF$. 
+Therefore, all these micro metrics can be efficiently calculated as,
+\begin{equation}\label{eq:microf-simple}
+   MicroP = MicroR = MicroF = \frac{\sum_i^N \ind{y^{(i)}, h^{(i)}}}{N} 
+\end{equation}
+
+\item \textbf{Macro-averaging}: Treats each \textit{class} equally, i.e., $w_c=1, \forall c \in C$. 
+\begin{equation}\label{eq:macrof}
+  MacroF_\beta = \frac{\sum_{c=1}^K F_{\beta;c}}{K}  
+\end{equation}
+
+
+In this method, all \textit{classes} have equal contribution to system performance. 
+As a result, in imbalanced class datasets, minority class \textit{instances} have higher weights than majority class instances. 
+\end{itemize}
+
+
+\subsection{Machine Translation Evaluation: BLEU}
+
+\textbf{BLEU} \cite{papineni-etal-2002-bleu} is the most popular evaluation metric for machine translation, formulated as the geometric mean of n-gram precision ($P_n$), up to 4-grams. 
+  $$ BLEU = BP \times \Big(\prod_{n=1}^4 P_n \Big)^\frac{1}{4}$$
+where, BP is brevity penalty, intended to penalize shorter translations resulting from poor recall.
+
+$$ BP = \exp(\min\{1-\frac{R}{H},\space 0\}) $$ 
+where, $R$ and $H$ are lengths (i.e., number of tokens) of reference and hypothesis, respectively.
+ 
+To compute n-gram precision, $P_n$, we need the following utilities: 
+
+%Consider a test corpus, $T = \{ (x^{(i)}, h^{(i)}, y^{(i)}) | i = 1,2,3...m \}$ where $x^{(i)}$, $h^{(i)}$, and $y^{(i)}$ are source, system hypothesis, and reference translation, respectively. Let $x = \{x^{(i)} \forall i\}$ and similar for $h$ and $y$. 
+Let $\textsc{Ngram}(n, a)$ return the set of all n-gram types in sequence $a$, 
+ 
+ %$$\textsc{Ngram}(n,a) = \{ a_i a_{i+1} ... a_{i+n-1}\}_{i \in [1, 2, ... (|a|+1-n)]}$$
+ $$\textsc{Ngram}(n,a) = \{ a_{i:i+n} \}_{i \in [1, 2, ... (|a|+1-n)]}$$
+ 
+where, $|a|$ is the length of sequence $a$ (i.e., number of tokens). Let $\textsc{Ngrams}(n)$ return all n-grams from all hypotheses,
+$$\textsc{Ngrams}(n) = \bigcup_{i=1}^N \textsc{Ngram}(n, h^{(i)})$$
+Finally, the combined precision for n-grams of size $n \in [1, 4]$, 
+\begin{equation}\label{eq:bleu-precision}
+  P_n = \frac{\sum_{c \in \textsc{Ngrams}(n)} \textsc{freq}(c) \cdot P_c} {\sum_{c' \in \textsc{Ngrams}(n)} \textsc{freq}(c')} 
+\end{equation}
+where $P_c$ is precision of n-gram type $c$, and $\textsc{freq}(c)$ is frequency of $c$ in \textit{hypotheses}.
+
+As mentioned in Section~\ref{ch:background-sec:cls-eval}, there exist an efficient method for calculating micro metrics which does not keep track of performance per each class type (see Equations \ref{eq:microf} and \ref{eq:microf-simple}). 
+Similarly, $P_n$ can also be efficiently calculated as following:
+\begin{equation}\label{eq:bleu-precision-simple}
+P_n = \frac{\sum_i^N \sum_{{c} \in \textsc{Ngram}(n, h^{(i)})}  \min\{\textsc{Count}(c, h^{(i)}), \textsc{Count}(c, y^{(i)}) \}}{ \sum_j^N (|h^{(j)}| + 1 - n)}     
+\end{equation}
+where $\textsc{Count}(c, a)$ return the total times n-gram type $c$ occur in sequence $a$.
+
+We highlight two shortcomings of \bleu{} regarding rare phenomena learning:
+\begin{enumerate}
+    \item As per our categorization of metrics in Section \ref{ch:background-sec:cls-eval}, BLEU is a \text{micro} metric, as it treats each n-gram instance equally. 
+
+    \item \bleu{} implementations provide $P_n$, which is the combined precision of all grams of length $n$, and do not provide performance breakdown for each n-gram type. For instance, \bleu{} provides $P_1$ which is the combined precision of all unigrams, but not precision of a specific type, such as $P_{the}$. 
+    Similarly, \bleu{} does not provide recall measure for types. Precision and recall measures for each class type is important to recognize performance difference between frequent and rare types.
+\end{enumerate}
+
+We address these two shortcomings in a later chapter.
+
+\begin{comment}
+$\forall \textsl{g} \in \textsc{Ngram}(n, a)$, let $\textsc{Count}(g, a)$ returns total instances of n-gram type in $a$.
+
+$$\textsc{Count}(g, a) = \sum_{t=1}^{|a| - |g|} \ind{g, a_{t:t+|g|}}$$
+
+Let $\textsc{Match}(\textsl{g}, a, b)$ returns the number of times n-gram instances of type $\textsl{g}$ \textit{matched} between a pair of sequences, $a$ and $b$.
+
+$$\textsc{Match}(\textsl{g}, a, b) = \sum_{i=1}^m \min\{\textsc{Count}(\textsl{g}, a), \textsc{Count}(\textsl{g}, b)\}$$
+
+Finally, the precision for all $n$-grams, where $n \in \{1,2,3,4\}$, is given by,
+$$
+P_n = \frac{\sum_i^N \sum_{{g} \in h^{(i)}} \textsc{Match}(\textsl{g}, h^{(i)}, y^{(i)})}
+{ \sum_j^N (|h^{(j)}| + 1 - n)} 
+$$
+
+%We will use the above notations metrics with the same in Chapter~\ref{ch:eval-metrics}. 
+
+We highlight two shortcomings of \bleu{} regarding rare phenomena learning, which we address in a later chapter:
+\begin{enumerate}
+    \item As per our categorization of metrics in Section \ref{ch:background-sec:cls-eval}, BLEU is a \text{micro} metric, as it treats each n-gram instance equally. 
+
+    \item $P_n$ is the combined precision of all grams of length $n$, and there is no performance breakdown for each type of n-gram. For instance, \bleu{} provides $P_1$ which is the combined precision of all unigrams, but not precision of a specific type, such as $P_{the}$. 
+    Similarly, \bleu{} does not provide recall measure at the granularity of each type. 
+\end{enumerate}
+
+\end{comment}
+

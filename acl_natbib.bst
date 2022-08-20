@@ -242,10 +242,10 @@ FUNCTION {init.urlbst.variables}
 
   % The first set allow you to enable or disable certain functionality.
   #1 'addeprints :=         % 0=no eprints; 1=include eprints
-  #1 'adddoiresolver :=     % 0=no DOI resolver; 1=include it
+  #1 'adddoiresolver :=0     % 0=no DOI resolver; 1=include it
   #1 'addpubmedresolver :=     % 0=no PUBMED resolver; 1=include it
   #2 'hrefform :=           % 0=no crossrefs; 1=hypertex xrefs; 2=hyperref refs
-  #1 'inlinelinks :=        % 0=URLs explicit; 1=URLs attached to titles
+  #1 'inlinelinks :=1       % 0=URLs explicit; 1=URLs attached to titles
 
   % String constants, which you _might_ want to tweak.
   "URL: " 'urlintro := % prefix before URL; typically "Available from:" or "URL":

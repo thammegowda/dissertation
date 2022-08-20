@@ -1,104 +1,87 @@
-\documentclass[oneside,letterpaper,12pt]{book}
-\usepackage[margin=1in,letterpaper]{geometry}  
-% http://graduateschool.usc.edu/wp-content/themes/fictional-university-theme/assets/doc/Manuscript_Formatting_and_Documentation_Styles.pdf
-% Paper: 8.5" x 11" -- letter paper
-% Margins:
-%    All margins 1" 
-%    Footer margin, page number must be 0.5" from the bottom
-%    Except page number, everything else must fit within margin
-% Spacing:
-%    Double space text throughout manuscript and indent paragraphs
-%    Sing space footnotes, long quoted para, fig and tab captions, items in lists and tables
-%    Bibliography (if style manual requires ) single space within entry, and double space between entries  
-% Font style and size:
-%    be consistent
-%    regular para text: 11 or 12 pt
-%    chapter title and main section heading, at least 16pt
-%    footnote, caption, eqns, within figs & tabs: atleast 9pt
-%    Color: black, except for hyerplinks, within tabs and figs
-%    bold for headings, chapter, section, sub section etc
-% Page num:
-%    0.5" from bottom; either center or right but be consistent
-%    dont bold or italicize
-%    same font family as body text
-%    
-% [[ Pagination and order see PDF in the above link]]  
-%    
+%-----------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATION
+%-----------------------------------------------------------------------------
 
-\usepackage{sectsty}
-%\chapternumberfont{\Large} 
-%\chaptertitlefont{\LARGE}
-\chapternumberfont{\fontsize{20pt}{20pt}\selectfont} 
-\chaptertitlefont{\fontsize{20pt}{20pt}\selectfont}
+% Use `report` class with `USCthesis` package (style file) by Brian P. Gerkey
+\documentclass[12pt]{report}
+%\documentclass[11.5pt]{report}
+
+%\let\Bbbk\relax
+% [options] can be any of these default/alternative flag:
+%   dissertation/thesis, final/proposal, copyright/nocopyright,
+%   fussy/sloppy, flushbottom/raggedbottom, clref/opref.
+%\usepackage[dissertation,final,raggedbottom]{USCthesis}
+\usepackage[dissertation]{USCthesis}
+%\usepackage[final]{nert}
 
 
-\input{header}  % all the imports and stuff
-\pagestyle{plain}
+\input{header}
+\renewcommand{\arraystretch}{1.4}
+\setstretch{1.09}
 
 
 \begin{document}
 
-\input{titlepage}
+%-----------------------------------------------------------------------------
+%	TITLE PAGE
+%-----------------------------------------------------------------------------
 
-\setstretch{1.15}     % line stretch
-%\setstretch{2}        % double space
+% Volume name could be added as option, e.g. `[Volume I]`.
+
+%\title{ The Inevitable Problem of Rare Phenomenon Learning \\ With Applications to Machine Translation }
+\title{THE INEVITABLE PROBLEM OF RARE PHENOMENA LEARNING IN MACHINE TRANSLATION}
+
+\author{Thamme Gowda}
+
+% Committee list is only shown in `proposal` layout.
+\committee{Prof. Jonathan May {\scriptsize (Chair)}\\*
+    Prof. Xuezhe Ma\\*
+    Prof. Chris Mattmann\\*
+    Prof. Xiang Ren\\*
+    Prof. Aiichiro Nakano\\*
+    Prof. Shrikanth Narayanan
+}
+
+% Submission information is only shown in `final` layout.
+\majorfield{COMPUTER SCIENCE}
+\submitdate{August 2022}
 
 %-----------------------------------------------------------------------------
-%	PREFACE aka FRONT MATTER
+%	PREFACE
 %-----------------------------------------------------------------------------
-\frontmatter
+
+% The preface environment prints the title page.
+\begin{preface}
+
+ 
+ \prefacesection[Epigraph]{}
+  \input{preface/epigraph}
 
 
+  % Dedication Page, which is truly unnecessary.
+  %\prefacesection{Dedication}
+  \prefacesection[Dedication]{}
+  \input{preface/dedication}
+  
+  % Acknowledgement Page, which is also unnecessary for proposals.
+  \prefacesection{Acknowledgments}
+  \input{preface/acks}
 
-\chapter{Dedication}
-\input{preface/dedication}
+  \mytoc
+  
+  \listoftables
+  \listoffigures
 
-\input{preface/inspiration}
+  %\prefacesection{Abbreviations}
+  %\input{preface/abbreviations}
 
-\chapter{Acknowledgments}
-\input{preface/acks}
+  % Abstract Page
+  \prefacesection{Abstract}
+   \input{preface/abstract}
 
-\tableofcontents
-\listoftables
-\listoffigures
-
-\chapter{Abstract}
-\input{preface/abstract}
-
-%-----------------------------------------------------------------------------
-%	MAIN MATTER
-%-----------------------------------------------------------------------------
-\mainmatter
-\include{chapter/01-intro}
-
-\include{chapter/02-ml-classification}
-
-\include{chapter/03-nlg-imbalance}
-
-\include{chapter/02-affirm-act}  % <-- not sure where this goes
-
-\include{chapter/04-evaluation}
-
-\include{chapter/05-imbalanced-learn}
-
-\include{chapter/06-multilingual-nmt}
-
-%-----------------------------------------------------------------------------
-%	BIBLIOGRAPHY / REFERENCES
-%-----------------------------------------------------------------------------
-\begin{singlespace}
-\bibliography{anthology}
-%\bibliographystyle{acl_natbib}
-\bibliographystyle{acl_natbib}
-\end{singlespace}
+\end{preface}
 
 
-%-----------------------------------------------------------------------------
-%	APPENDICES
-%-----------------------------------------------------------------------------
-\appendix
-\include{chapter/x01-appendix-A}
+\input{body}
 
-
-%\backmatter
 \end{document}

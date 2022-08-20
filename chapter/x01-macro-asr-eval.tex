@@ -1,0 +1,111 @@
+\chapter{Macro-averaged ASR Evaluation}
+
+In chapter \ref{ch:eval-metrics}, we have explored applicability of classifier evaluation metrics for MT evaluation. 
+By treating each word type (or class) equally, \maf1 is an effective indicator of downstream CLIR task performance than metrics that treat each token (or instance) equally.
+%We empirically verified using the cross-lingual information retrieval (CLIR) tasks on 2C, 2B, and 2S datasets.
+%Since the word type distributions in natural languages are severely imbalanced and the types that occur rarely are contain more information than frequent types, macro-averaging is the correct way of obtaining the overall performance. However, the MT evaluation metrics that are currently in use, e.g. BLEU, treat each token equally which result in marginalization of rare types.
+
+Similar to machine translation, automatic speech recognition (ASR) models also produce words, from an imbalanced type distribution.
+The ASR evaluation metrics that are in use today, e.g., word error rate (WER), assign equal importance to each token. 
+Following our findings in machine translation evaluation, we have conducted a similar study on ASR evaluation.
+ 
+The following ASR metrics are used in our study:
+\begin{itemize}
+\item Word error rate (WER):  the popular ASR evaluation metric. (Morris et al. 2004)
+\item Match error rate (MER) (Morris et al. 2004)
+\item Word information lost (WIL) and Word information preserved (WIP) (Morris et al. 2004)
+\end{itemize}
+
+
+In addition, we also include these following MT evaluation metrics for ASR evaluation without any modification.
+\begin{itemize}
+\item \bleu: the popular MT evaluation metric \cite{papineni-etal-2002-bleu}
+\item \mif1 : micro-averaged $F_1$ measure \cite{gowda2021macroaverage}
+\item \maf1 : macro-averaged $F_1$ measure \cite{gowda2021macroaverage}
+\end{itemize}
+
+
+ASR metrics use minimum edit-distance based alignment for enforcing word order, whereas our current MT metrics are free from word order information. We consider modification of MT metrics in the future; currently, we focus on establishing the baselines and verifying if we have all the resources needed to successfully conduct this study.
+
+We set up CLIR downstream task on Analysis speech datasets where we can evaluate both ASR and CLIR systems using automatic evaluation metrics. 
+We use four languages from MATERIAL program: 2C, 2B, 2S and 3S. The most recent language, 3C, is excluded since the gold transcripts are available only to a subset of Analysis speech documents. We use all the ASR systems built by our team for these four languages. To reduce the number of variables in our end-to-end pipeline, we do not run machine translation pipelines on ASR transcripts, instead our CLIR system uses translation-tables (TTables) for matching English queries against ASR transcribed documents. All the ASR systems use the same CLIR settings for each language.
+ 
+
+For each ASR system, we compute ASR performance using all the ASR evaluation metrics mentioned before, as well as an IR performance using mAQWV. The ASR metric that has the strongest absolute correlation with mAQWV is considered the strong indicator of downstream performance, and hence more useful than others. 
+
+%\tg{FIXME: this is copy pasted from monthly report. remove the unwanted lines.}
+Table \ref{tab:asr-aqwv-all} has Pearson and Kendall correlation coefficients using all 43 ASR systems collectively as single sample set. It shows that MicroF1 achieves the strongest correlation with mAQWV. All correlations achieve statistical significance (i.e., p < 0.05). However, concluding MicroF1 as the winner would be wrong, since the data points are not identically distributed. 
+
+%table data is here: https://docs.google.com/spreadsheets/d/1VR-S-aQBUrTlwEwtCb7Z3H8RX7N9VO3pSvKx2rH_GTg/edit#gid=2029608548
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{c c c c c c c c c }
+Lang & N & WER & MER & WIL & WIP & \bleu & \maf1 & \mif1 \\ \hline \hline
+%All & 43 & Pearson & -0.897 & -0.904  & -0.906 & 0.906 & 0.901 & 0.932 & 0.873\\
+All & 43 & -0.792 & -0.794  & -0.805 & 0.805 & 0.791 & 0.835 & 0.777 \\ \hline
+\end{tabular} 
+    \caption{Kendall's rank correlation coefficient between ASR metrics and mAQWV using all 43 ASR systems. 
+    All correlations are statistically significant at $\alpha=0.05$.}
+    \label{tab:asr-aqwv-all}
+\end{table}
+
+
+Since the 43 data points belong to separate underlying distributions based on their test sets and TTables, we partition them based on their respective source language to satisfy that samples are independent and identically distributed (IID) random variables, as given in Table \ref{tab:asr-aqwv-kendall}.
+On 2C dataset having 21 ASR systems, correlations are statistically significant (p < 0.05), and MacroF1 has the strongest correlation with mAQWV. On 2B and 2S having only 7 ASR systems each, statistical significance is not attained (as p >= 0.05), hence we ignore those correlations.
+On 3S having 8 ASR systems, correlations are significant (p < 0.05) and MicroF1 scores slightly higher correlation than others.
+%However, Pearson correlation coefficient is known to be susceptible to outliers.
+At a small sample size, such as N=8, having a single outlier could greatly influence the magnitude of the Pearson correlation coefficient. 
+
+%Finally, in Table \ref{tab:asr-aqwv-kendall}, we show Kendall’s rank correlation coefficient with mAQWV. Here the sample sets are IIDs, and the correlation coefficient is robust to outliers, hence the conclusions from this table are more reliable than Tables 1 and 2.  
+
+\begin{table}[h!t]
+    \footnotesize
+    \centering
+    \begin{tabular}{ccccccccc}
+Lang & N & WER & MER & WIL & WIP & BLEU lc & MicroF1 lc & MacroF1 lc \\
+2C & 21 & -0.524* & -0.524*  & -0.524  & 0.524 & 0.505 & 0.530  & 0.578 \\
+2B & 7  & -0.143  & -0.143  & -0.238 & 0.238 & 0.293 & 0.195 & 0.238  \\
+2S & 7  & -0.524  & -0.524  & -0.524 & 0.524 & 0.488 & 0.524 & 0.586  \\
+3S & 8  & -0.857*  & -0.857* & -0.857* & 0.857* & 0.857* & 0.857* & 0.857* \\
+\end{tabular} 
+    \caption{Kendall’s rank correlation coefficient  between ASR metrics and mAQWV. Values indicated by * are significant at $\alpha=0.05$ }
+    \label{tab:asr-aqwv-kendall}
+\end{table}
+
+
+\begin{comment}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cccccccccc}
+Lang & N & Correlation & WER & MER & WIL & WIP & \bleu lc & \maf1 lc & \mif1 lc \\ \hline \hline
+2C & 21 & Pearson & -0.709 | 0.00 & -0.679 | 0.00 & -0.707 | 0.00 & 0.707 | 0.00 & 0.642 | 0.00 & 0.705 | 0.00 & 0.796 | 0.00 \\
+2B & 7 & Pearson & -0.584 | 0.17 & -0.567 | 0.18 & -0.544 | 0.21 & 0.544 | 0.21 & 0.593 | 0.16 & 0.502 | 0.25 & 0.386 | 0.39 \\
+2S & 7 & Pearson & -0.529 | 0.22 & -0.527 | 0.22 & -0.527 | 0.22 & 0.527 | 0.22 & 0.514 | 0.24 & 0.529 | 0.22 & 0.543 | 0.21 \\
+3S & 8 & Pearson & -0.987 | 0.00 & -0.988 | 0.00 & -0.985 | 0.00 & 0.985 | 0.00 & 0.987 | 0.00 & 0.990 | 0.00 & 0.975 | 0.00 \\ \hline 
+\end{tabular} 
+    \caption{Pearson correlation coefficient and p-values (separated by | )  between ASR metrics and mAQWV. }
+    \label{tab:asr-aqwv-pearson}
+\end{table}
+
+
+
+\begin{table}[ht]
+    \footnotesize
+    \centering
+    \begin{tabular}{cccccccccc}
+Lang & N & Correlation & WER & MER & WIL & WIP & BLEU lc & MicroF1 lc & MacroF1 lc \\
+2C & 21 & Kendall & -0.524 | 0.00 & -0.524 | 0.00 & -0.524 | 0.00 & 0.524 | 0.00 & 0.505 | 0.00 & 0.530 | 0.00 & 0.578 | 0.00 \\
+2B & 7 & Kendall & -0.143 | 0.77 & -0.143 | 0.77 & -0.238 | 0.56 & 0.238 | 0.56 & 0.293 | 0.36 & 0.195 | 0.54 & 0.238 | 0.56 \\
+2S & 7 & Kendall & -0.524 | 0.14 & -0.524 | 0.14 & -0.524 | 0.14 & 0.524 | 0.14 & 0.488 | 0.13 & 0.524 | 0.14 & 0.586 | 0.07 \\
+3S & 8 & Kendall & -0.857 | 0.00 & -0.857 | 0.00 & -0.857 | 0.00 & 0.857 | 0.00 & 0.857 | 0.00 & 0.857 | 0.00 & 0.857 | 0.00 \\
+\end{tabular} 
+    \caption{Kendall’s rank correlation coefficient and p-values (separated by | )  between ASR metrics and mAQWV. }
+    \label{tab:asr-aqwv-kendall}
+\end{table}
+\end{comment}
+
+After a careful correlation analysis between ASR metrics and CLIR performance, we conclude the following:
+On 2B, 2S and 3S datasets, we do not have the sufficient number of samples to draw a reliable conclusion. 
+On 2C dataset where large enough sample size is available for obtaining reliable statistics, MacroF1 is a strong indicator of CLIR performance.
+

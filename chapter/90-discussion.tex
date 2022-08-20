@@ -1,0 +1,75 @@
+\chapter{Discussion}
+\label{ch:discussion}
+
+
+\section{Conclusion}
+We have made the following progress towards rare phenomena learning in machine translation:
+\begin{itemize}
+ \item In chapter \ref{ch:nlg-imbalance}, we offered a high level architecture for NMT consisting of two ML components: an autoregressor and a classifier.
+ % which enabled us to borrow findings from other domains where these two models are studied in depth. 
+  We showed that MT models have much in common with classification models, especially class imbalance, which negatively affects NMT performance.
+ While it was known before that tuning the vocabulary size is important for achieving good MT performance, the literature lacked a convincing and theoretically grounded explanation for \textit{why only certain vocabulary size values are the best}.
+ We have offered an explanation as well as a heuristic to automatically find near-optimal vocabulary size without needing an expensive search.
+Upon a careful inspection of performance on each vocabulary type, we have found that recall of types degrades as training examples become rarer.
+ 
+\item In chapter \ref{ch:eval-metrics}, we have found that existing evaluation metrics miss the complications of unavoidable imbalance in test sets. 
+ The best practice for evaluating classification models on imbalanced test sets is to use macro-averaging, which treats each class equally instead of each instance equally. 
+ By applying this best practice to MT evaluation, we achieved a metric that has strong correlation with the semantic oriented downstream task of cross lingual information retrieval.
+ %The resulting metric treats each type equally, as a result, rare tokens gained higher emphasis, along the lines of information theoretic view on natural languages. 
+The macro-averaged metric also revealed discrepancies between supervised and unsupervised NMT modeling, a property which other metrics are unable to reveal.  
+
+\item In chapter \ref{ch:robustness}, we explored linguistic styles such as language alternations and partial translations, and found that multilingual models, as built currently, are not robust. 
+ We provided a way to evaluate robustness by generating language alternations and partial translation test cases.
+ We also explored techniques to improve robustness and found sentence concatenation and denoising to be useful. In addition, we found that models trained with augmented training data result in less attention bleed, implying a better attention mechanism.
+ 
+\item In chapter \ref{ch:rare-langs}, we presented three open-source tools for advancing machine translation research and development: (1) \mtdata{} greatly simplifies the process of retrieving datasets for a wide range of languages, (2) \nlcodec{} simplifies the way to preprocess, store, and retrieve datasets for scalable NMT, and (3) \rtg{} simplifies training NMT models.
+ Using these tools, we demonstrated a multilingual NMT model that supports 600 languages to English, thus enabling MT for 500 more rare languages which are not supported by others. We show that by fine-tuning the multilingual model on a limited quantity of training data, the resulting model achieves state-of-the art results on rare languages. 
+\end{itemize}
+
+
+\section{Future Directions}
+
+As discussed in Chapter~\ref{ch:intro}, categorical imbalance is ubiquitous in nature, and the rare phenomena learning problem manifests in many domains and tasks. In this section, we envision and motivate a few future research pathways.
+
+%We have considered MT, a specific case of sequence-to-sequence learning.
+The first direction is taking the lessons learned from MT task and directly applying them to other natural language generation tasks.  The inevitable type imbalance in natural language datasets is likely affecting all ML based language generation models.
+Currently, text generation models, such as image captioning, automatic speech recognition, and text summarization, are evaluated using micro metrics, such as word error rate, METEOR~\cite{banerjee-lavie-2005-meteor}, and ROUGE~\cite{lin-2004-rouge}, etc. 
+These micro metrics do not provide performance breakdown for each type, so frequency-based modeling biases, especially the poor recall of rare types, may have been unnoticed in the other text generation tasks.
+A future direction is to study evaluation metrics that place more emphasis on rare words than the currently used micro metrics. 
+% Rare phenomena learning improves diversity in language generation, which is an important goal in dialogue generation.
+
+%(2) Reducing the imbalance during training, 
+%\maf{} is our first attempt in emphasizing the long tail of rare types; more sophisticated macro-average metrics by considering higher order n-grams maybe of interest.
+% that once we have done all the easy stuff, the long tail will come back to haunt us.  
+
+The second direction is exploration of other methods for rare phenomena learning in sequential data.
+%We conducted a preliminary study of methods such as weighted Cross Entropy, Focal loss, and effective number of samples. 
+%These methods have been shown effective on one-to-one transformation (such as image classification), however these methods did not make consistent improvements when incorporated in to the state-of-the-art transformer architecture for sequential data, having many-to-many transformation.
+%While we could not achieve class balancing by simply altering sampling
+Byte pair encoding provides a unique opportunity to balance classes within natural language sequences, and we have tuned its hyperparameter to reduce imbalance severity. 
+Other such opportunities may be available to deal with the curse of natural imbalances.
+For instance, in masked language models \cite{devlin-etal-2019-bert,rogers-etal-2020-primer}, masking strategies aiming to improve class balance may be effective. 
+%Regarding the unreasonable effectiveness of label smoothing \cite{szegedy2016re-inception},
+The label smoothing~\cite{szegedy2016re-inception} technique alters class distribution by moving a certain quantity of probability mass between classes; current efforts to reason about the effectiveness of the label smoothing ~\cite{muller-2019-when-labelsmooth,gao-etal-2020-towards} lack investigation from the class balancing perspective.
+Adaptive label smoothing methods \cite{wang-etal-2021-diversifying} that aim to improve diversity by learning rare phenomena is another potential pathway.
+
+%We think the adaptive optimizer (e.g., ADAM), and label smoothing, which are essential to achieve the best results, make some of these imbalanced learning methods ineffective. 
+%Label smoothing \cite{szegedy2016re-inception} is  
+
+Third, rare phenomena learning is an important goal in other sequential or time series problems; e.g., whole-genome sequencing \cite{schubach-2017-imbalance-genome}, financial market events prediction \cite{rechenthin-2014-ml-stock}, space weather forecasting \cite{azim-etal-2019-rare-solar-flare}, and atypical event detection in wearable sensory data \cite{burghardt2021having}. 
+%For instance, diseases causing genetic variants are tiny minority among all the variants in the whole-genome sequencing
+%events, such as financial crisis seldom occur and has less training instances, in financial market events prediction problem, and the high intensity solar flares and asteroid collisions occur very rarely in space monitoring and weather forecasting.
+%Predicting or forecasting these rare phenomena when they are about to occur is an important objective for ML applications in these domains. 
+Even though these problems appear to be drastically different from natural language sequences, the autoregressive sequence learning and prediction models, and macro-vs-micro arguments about evaluation metrics described in this thesis seem applicable.
+For time series with continuous output values, e.g., heart rate prediction, evaluation metrics and loss functions that emphasize the errors made on extreme value readings would be another pathways. 
+
+
+Lastly, there are numerous hyperparameters in ML modeling: dropout rate, label smoothing rate, batch size, learning rate, warm-up steps, etc.
+A question ML practitioners typically ask is, \textit{`what range of hyperparameter yield the optimal performance?'}; they find its answer by searching among a range of guesses, and choosing a value that yields the best performance on a validation set.
+%Often, the prior experiences of the practitioner influence their search criteria.
+However, finding an answer to \textit{`what range of values are good?'} does not necessary yield an answer to \textit{`why are only certain point(s) on the number line best?'}, or alternatively, \textit{`why do values outside that range hurt the end performance?'}.
+One such \textit{why} question we asked in this thesis is the question of vocabulary size hyperparameter. 
+May we continue this spirit of finding \textit{why}s for all other hyperparameters. 
+
+% \subsection*{Postscript} 
+
